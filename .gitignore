@@ -3,3 +3,7 @@ MUST_HAVE_SPEC.md
 PRODUCT_DESIGN_GUIDE.md
 skills-lock.json
 .agents
+.pytest_cache
+.vscode
+.venv
+venv
