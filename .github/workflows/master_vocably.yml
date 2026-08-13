@@ -39,9 +39,13 @@ jobs:
             requirements.txt
             startup.sh
             Procfile
-            antenv/
+            !backend/.venv/
+            !backend/.pytest_cache/
+            !backend/__pycache__/
+            !backend/**/*.pyc
             !.git/
             !frontend/
+            !antenv/
 
   deploy:
     runs-on: ubuntu-latest
