@@ -39,13 +39,13 @@ jobs:
             requirements.txt
             startup.sh
             Procfile
-            antenv/
             !backend/.venv/
             !backend/.pytest_cache/
             !backend/__pycache__/
             !backend/**/*.pyc
             !.git/
             !frontend/
+            !antenv/
 
   deploy:
     runs-on: ubuntu-latest
@@ -65,3 +65,4 @@ jobs:
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B2EDB4F6A4904D31ADF947A377B5F4CD }}
+          app-settings-json: '[{"name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "true", "slotSetting": false}]'
