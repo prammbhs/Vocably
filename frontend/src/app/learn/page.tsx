@@ -6,7 +6,7 @@ import { TopBar } from '@/components/layout/TopBar';
 import { RightSidebar } from '@/components/layout/RightSidebar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { LearningPath } from '@/components/learn/LearningPath';
-import { getCourseTree, getCurrentUser, Unit, User } from '@/lib/api/client';
+import { getCoursePath, getCurrentUser, Unit, User } from '@/lib/api/client';
 
 export default function LearnPage() {
   const [units, setUnits] = useState<Unit[]>([]);
@@ -14,8 +14,8 @@ export default function LearnPage() {
 
   useEffect(() => {
     async function loadData() {
-      const [treeData, userData] = await Promise.all([getCourseTree(), getCurrentUser()]);
-      setUnits(treeData);
+      const [pathData, userData] = await Promise.all([getCoursePath(), getCurrentUser()]);
+      setUnits(pathData.units);
       setUser(userData);
     }
     loadData();

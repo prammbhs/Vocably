@@ -33,7 +33,7 @@ export default function ProfilePage() {
                 {user?.username.charAt(0) || 'D'}
               </div>
               <div>
-                <h1 className="text-2xl font-black text-[#4b4b4b]">{user?.username || 'DuoLearner'}</h1>
+                <h1 className="text-2xl font-black text-[#4b4b4b]">{user?.display_name || user?.username || 'DuoLearner'}</h1>
                 <p className="text-sm font-bold text-[#afafaf] mt-0.5">Joined August 2026</p>
               </div>
             </div>
@@ -44,7 +44,7 @@ export default function ProfilePage() {
               <div className="border-2 border-[#e5e5e5] rounded-2xl p-4 flex items-center gap-4">
                 <Flame className="w-8 h-8 text-[#ff9600] fill-[#ff9600]" />
                 <div>
-                  <span className="text-xl font-black text-[#4b4b4b] block">{user?.streak_count || 5}</span>
+                  <span className="text-xl font-black text-[#4b4b4b] block">{user?.current_streak ?? 0}</span>
                   <span className="text-xs font-bold text-[#afafaf] uppercase">Day streak</span>
                 </div>
               </div>
@@ -52,7 +52,7 @@ export default function ProfilePage() {
               <div className="border-2 border-[#e5e5e5] rounded-2xl p-4 flex items-center gap-4">
                 <Zap className="w-8 h-8 text-[#ffc800] fill-[#ffc800]" />
                 <div>
-                  <span className="text-xl font-black text-[#4b4b4b] block">{user?.xp_total || 350}</span>
+                  <span className="text-xl font-black text-[#4b4b4b] block">{user?.total_xp ?? 0}</span>
                   <span className="text-xs font-bold text-[#afafaf] uppercase">Total XP</span>
                 </div>
               </div>

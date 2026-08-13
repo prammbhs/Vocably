@@ -4,543 +4,367 @@ from app.database import engine, Base, SessionLocal
 import app.models as models
 
 def seed_database(db: Session):
-    print("Creating tables if they don't exist...")
+    print("Resetting database tables...")
+    Base.metadata.drop_all(bind=db.get_bind())
     Base.metadata.create_all(bind=db.get_bind())
 
-    # Check if course already seeded
-    existing_course = db.query(models.Course).filter_by(name="English Foundations").first()
-    if existing_course:
-        print("Database already seeded with English Foundations course.")
-        return
-
-    print("Seeding English Foundations course...")
+    print("Seeding Hindi Language Course...")
 
     # 1. Course
     course = models.Course(
-        name="English Foundations",
-        language="English",
-        description="Master essential English vocabulary, grammar, and everyday conversation.",
-        image_url="https://illustrations.puchu.pub/english_course.png"
+        name="Hindi Essentials",
+        language="Hindi",
+        description="Learn to speak, read, and write Hindi phrases, greetings, numbers, and daily conversation.",
+        image_url="https://illustrations.puchu.pub/hindi_course.png"
     )
     db.add(course)
     db.flush()
 
-    # 2. Units, Skills, Lessons, Exercises
-    # --- Unit 1: Basics & Greetings ---
+    # 2. Unit 1: Basics & Greetings (बुनियादी बातें और अभिवादन)
     unit1 = models.Unit(
         course_id=course.id,
-        title="Basics & Greetings",
-        description="Learn basic English greetings, introductions, and polite phrases.",
+        title="SECTION 1, UNIT 1",
+        description="Form basic Hindi sentences, introduce yourself, and greet people",
         order_index=1
     )
     db.add(unit1)
     db.flush()
 
-    # Skill 1: Greetings
+    # Skill 1: Greetings (अभिवादन)
     skill1 = models.Skill(
         unit_id=unit1.id,
         title="Greetings",
-        description="Say hello, goodbye, and introduce yourself.",
+        description="Say Namaste, Dhanyavaad, and introduce yourself.",
         icon="hand-wave",
         order_index=1
     )
     db.add(skill1)
     db.flush()
 
-    # Lesson 1: Saying Hello
-    lesson1_1 = models.Lesson(
+    # Single comprehensive Lesson for Skill 1 containing 7 varied Hindi exercises!
+    lesson1 = models.Lesson(
         skill_id=skill1.id,
-        title="Saying Hello",
-        description="Learn standard English greetings.",
+        title="Hindi Greetings & Phrases",
+        description="Master essential Hindi greetings and polite expressions.",
         order_index=1,
-        xp_reward=10
+        xp_reward=15
     )
-    db.add(lesson1_1)
+    db.add(lesson1)
     db.flush()
 
-    exercises1_1 = [
+    exercises1 = [
         models.Exercise(
-            lesson_id=lesson1_1.id,
+            lesson_id=lesson1.id,
             type="MULTIPLE_CHOICE",
-            prompt="Select the correct word for 'Hello':",
+            prompt="Select the correct word for 'Hello / Greetings':",
             data={
                 "options": [
-                    {"id": "a", "text": "Hello"},
-                    {"id": "b", "text": "Goodbye"},
-                    {"id": "c", "text": "Table"}
+                    {"id": "a", "text": "नमस्ते (Namaste)"},
+                    {"id": "b", "text": "पानी (Paani)"},
+                    {"id": "c", "text": "किताब (Kitaab)"}
                 ],
                 "correct_option": "a"
             },
             order_index=1
         ),
         models.Exercise(
-            lesson_id=lesson1_1.id,
+            lesson_id=lesson1.id,
             type="WORD_BANK",
             prompt="Construct the sentence: Hello, how are you?",
             data={
-                "prompt_translation": "Greetings question",
-                "options": ["Hello,", "how", "are", "you?", "cat", "water"],
-                "correct_sequence": ["Hello,", "how", "are", "you?"]
+                "prompt_translation": "Greetings in Hindi",
+                "options": ["नमस्ते,", "आप", "कैसे", "हैं?", "सेब", "दूध"],
+                "correct_sequence": ["नमस्ते,", "आप", "कैसे", "हैं?"]
             },
             order_index=2
         ),
         models.Exercise(
-            lesson_id=lesson1_1.id,
+            lesson_id=lesson1.id,
             type="MATCH_PAIRS",
-            prompt="Match the corresponding pairs:",
+            prompt="Match the Hindi words with English translations:",
             data={
                 "pairs": [
-                    {"left": "Hello", "right": "Hola"},
-                    {"left": "Goodbye", "right": "Adiós"},
-                    {"left": "Please", "right": "Por favor"}
+                    {"left": "Namaste", "right": "Hello"},
+                    {"left": "Dhanyavaad", "right": "Thank you"},
+                    {"left": "Haan", "right": "Yes"},
+                    {"left": "Nahi", "right": "No"}
                 ]
             },
             order_index=3
         ),
         models.Exercise(
-            lesson_id=lesson1_1.id,
+            lesson_id=lesson1.id,
             type="FILL_BLANK",
-            prompt="Fill in the blank:",
+            prompt="Complete the sentence: ___ नाम राहुल है (My name is Rahul)",
             data={
-                "sentence_with_blank": "___ morning, nice to meet you!",
-                "options": ["Good", "Bad", "Red"],
-                "correct_option": "Good"
+                "sentence_with_blank": "___ नाम राहुल है",
+                "options": ["मेरा (Mera)", "तुम्हारा (Tumhara)", "वह (Woh)"],
+                "correct_option": "मेरा (Mera)"
             },
             order_index=4
         ),
         models.Exercise(
-            lesson_id=lesson1_1.id,
+            lesson_id=lesson1.id,
             type="TYPE_ANSWER",
-            prompt="Translate 'Hola' to English:",
-            data={
-                "accepted_answers": ["hello", "Hello", "hi", "Hi"]
-            },
-            order_index=5
-        )
-    ]
-    db.add_all(exercises1_1)
-
-    # Lesson 2: Farewell & Manners
-    lesson1_2 = models.Lesson(
-        skill_id=skill1.id,
-        title="Farewell & Manners",
-        description="Learn polite expressions and goodbyes.",
-        order_index=2,
-        xp_reward=10
-    )
-    db.add(lesson1_2)
-    db.flush()
-
-    exercises1_2 = [
-        models.Exercise(
-            lesson_id=lesson1_2.id,
-            type="MULTIPLE_CHOICE",
-            prompt="What is the polite response to 'Thank you'?",
-            data={
-                "options": [
-                    {"id": "a", "text": "You are welcome"},
-                    {"id": "b", "text": "No hello"},
-                    {"id": "c", "text": "Goodbye"}
-                ],
-                "correct_option": "a"
-            },
-            order_index=1
-        ),
-        models.Exercise(
-            lesson_id=lesson1_2.id,
-            type="WORD_BANK",
-            prompt="Construct the sentence: Have a nice day!",
-            data={
-                "options": ["Have", "a", "nice", "day!", "apple", "running"],
-                "correct_sequence": ["Have", "a", "nice", "day!"]
-            },
-            order_index=2
-        ),
-        models.Exercise(
-            lesson_id=lesson1_2.id,
-            type="MATCH_PAIRS",
-            prompt="Match the words with their meanings:",
-            data={
-                "pairs": [
-                    {"left": "Thank you", "right": "Gracias"},
-                    {"left": "You're welcome", "right": "De nada"},
-                    {"left": "See you", "right": "Nos vemos"}
-                ]
-            },
-            order_index=3
-        ),
-        models.Exercise(
-            lesson_id=lesson1_2.id,
-            type="FILL_BLANK",
-            prompt="Complete the sentence:",
-            data={
-                "sentence_with_blank": "See you ___, have fun!",
-                "options": ["later", "chair", "tree"],
-                "correct_option": "later"
-            },
-            order_index=4
-        ),
-        models.Exercise(
-            lesson_id=lesson1_2.id,
-            type="TYPE_ANSWER",
-            prompt="Translate 'Gracias' to English:",
+            prompt="Translate 'Dhanyavaad' to English:",
             data={
                 "accepted_answers": ["thank you", "Thank you", "thanks", "Thanks"]
             },
             order_index=5
+        ),
+        models.Exercise(
+            lesson_id=lesson1.id,
+            type="MULTIPLE_CHOICE",
+            prompt="What does 'शुभ प्रभात' (Shubh Prabhat) mean?",
+            data={
+                "options": [
+                    {"id": "a", "text": "Good Morning"},
+                    {"id": "b", "text": "Good Night"},
+                    {"id": "c", "text": "Goodbye"}
+                ],
+                "correct_option": "a"
+            },
+            order_index=6
+        ),
+        models.Exercise(
+            lesson_id=lesson1.id,
+            type="WORD_BANK",
+            prompt="Construct: Thank you very much!",
+            data={
+                "options": ["बहुत", "बहुत", "धन्यवाद!", "पानी", "रोटी"],
+                "correct_sequence": ["बहुत", "बहुत", "धन्यवाद!"]
+            },
+            order_index=7
         )
     ]
-    db.add_all(exercises1_2)
+    db.add_all(exercises1)
 
-    # Skill 2: Essentials 1
+    # Skill 2: Basics 1 (बुनियादी शब्द)
     skill2 = models.Skill(
         unit_id=unit1.id,
-        title="Essentials 1",
-        description="Master key pronouns and basic verbs.",
+        title="Basics 1",
+        description="Learn key Hindi pronouns and simple verbs.",
         icon="star",
         order_index=2
     )
     db.add(skill2)
     db.flush()
 
-    lesson2_1 = models.Lesson(
+    lesson2 = models.Lesson(
         skill_id=skill2.id,
-        title="People & Pronouns",
-        description="I, you, he, she, and we.",
+        title="Pronouns & Verbs",
+        description="Master Main, Tum, Aap, and basic verbs.",
         order_index=1,
-        xp_reward=10
+        xp_reward=15
     )
-    db.add(lesson2_1)
+    db.add(lesson2)
     db.flush()
 
-    exercises2_1 = [
+    exercises2 = [
         models.Exercise(
-            lesson_id=lesson2_1.id,
+            lesson_id=lesson2.id,
             type="MULTIPLE_CHOICE",
-            prompt="Select the pronoun for a female person:",
+            prompt="Select the Hindi pronoun for 'I':",
             data={
                 "options": [
-                    {"id": "a", "text": "She"},
-                    {"id": "b", "text": "He"},
-                    {"id": "c", "text": "It"}
+                    {"id": "a", "text": "मैं (Main)"},
+                    {"id": "b", "text": "तुम (Tum)"},
+                    {"id": "c", "text": "वह (Woh)"}
                 ],
                 "correct_option": "a"
             },
             order_index=1
         ),
         models.Exercise(
-            lesson_id=lesson2_1.id,
+            lesson_id=lesson2.id,
             type="WORD_BANK",
-            prompt="Construct: I am a student.",
+            prompt="Construct: I am a student (मैं एक छात्र हूँ).",
             data={
-                "options": ["I", "am", "a", "student.", "car", "table"],
-                "correct_sequence": ["I", "am", "a", "student."]
+                "options": ["मैं", "एक", "छात्र", "हूँ", "कलम", "किताब"],
+                "correct_sequence": ["मैं", "एक", "छात्र", "हूँ"]
             },
             order_index=2
         ),
         models.Exercise(
-            lesson_id=lesson2_1.id,
+            lesson_id=lesson2.id,
             type="MATCH_PAIRS",
-            prompt="Match the pronouns:",
+            prompt="Match Hindi pronouns:",
             data={
                 "pairs": [
-                    {"left": "I", "right": "Yo"},
-                    {"left": "You", "right": "Tú"},
-                    {"left": "We", "right": "Nosotros"}
+                    {"left": "Main", "right": "I"},
+                    {"left": "Tum", "right": "You"},
+                    {"left": "Hum", "right": "We"},
+                    {"left": "Woh", "right": "He/She"}
                 ]
             },
             order_index=3
         ),
         models.Exercise(
-            lesson_id=lesson2_1.id,
+            lesson_id=lesson2.id,
             type="FILL_BLANK",
-            prompt="Fill in the blank:",
+            prompt="Fill in the blank: मैं पानी ___ हूँ (I am drinking water).",
             data={
-                "sentence_with_blank": "She ___ a teacher.",
-                "options": ["is", "are", "am"],
-                "correct_option": "is"
+                "sentence_with_blank": "मैं पानी ___ हूँ",
+                "options": ["पी रहा (Peera)", "खा रहा (Khaara)", "सो रहा (Sora)"],
+                "correct_option": "पी रहा (Peera)"
             },
             order_index=4
         ),
         models.Exercise(
-            lesson_id=lesson2_1.id,
+            lesson_id=lesson2.id,
             type="TYPE_ANSWER",
-            prompt="Translate 'Yo soy' to English:",
+            prompt="Translate 'Haan' to English:",
             data={
-                "accepted_answers": ["i am", "I am", "I'm", "i'm"]
+                "accepted_answers": ["yes", "Yes"]
             },
             order_index=5
+        ),
+        models.Exercise(
+            lesson_id=lesson2.id,
+            type="MULTIPLE_CHOICE",
+            prompt="What is 'Water' in Hindi?",
+            data={
+                "options": [
+                    {"id": "a", "text": "पानी (Paani)"},
+                    {"id": "b", "text": "खाना (Khaana)"},
+                    {"id": "c", "text": "दूध (Doodh)"}
+                ],
+                "correct_option": "a"
+            },
+            order_index=6
+        ),
+        models.Exercise(
+            lesson_id=lesson2.id,
+            type="WORD_BANK",
+            prompt="Construct: You are good (आप अच्छे हैं).",
+            data={
+                "options": ["आप", "अच्छे", "हैं", "पेड़", "नदी"],
+                "correct_sequence": ["आप", "अच्छे", "हैं"]
+            },
+            order_index=7
         )
     ]
-    db.add_all(exercises2_1)
+    db.add_all(exercises2)
 
-    # --- Unit 2: Food & Everyday Life ---
-    unit2 = models.Unit(
-        course_id=course.id,
-        title="Food & Everyday Life",
-        description="Learn vocabulary for food, drinks, and daily activities.",
-        order_index=2
-    )
-    db.add(unit2)
-    db.flush()
-
-    # Skill 3: Food
+    # Milestone Skill 3: Chest
     skill3 = models.Skill(
-        unit_id=unit2.id,
-        title="Food & Drinks",
-        description="Order meals, name fruits, and request drinks.",
-        icon="apple",
-        order_index=1
+        unit_id=unit1.id,
+        title="Chest",
+        description="Chest milestone reward",
+        icon="chest",
+        order_index=3
     )
     db.add(skill3)
     db.flush()
 
-    lesson3_1 = models.Lesson(
-        skill_id=skill3.id,
-        title="Breakfast & Drinks",
-        description="Coffee, water, bread, and apples.",
-        order_index=1,
-        xp_reward=10
-    )
-    db.add(lesson3_1)
-    db.flush()
-
-    exercises3_1 = [
-        models.Exercise(
-            lesson_id=lesson3_1.id,
-            type="MULTIPLE_CHOICE",
-            prompt="Select the English word for 'Agua':",
-            data={
-                "options": [
-                    {"id": "a", "text": "Water"},
-                    {"id": "b", "text": "Milk"},
-                    {"id": "c", "text": "Juice"}
-                ],
-                "correct_option": "a"
-            },
-            order_index=1
-        ),
-        models.Exercise(
-            lesson_id=lesson3_1.id,
-            type="WORD_BANK",
-            prompt="Construct: I drink coffee in the morning.",
-            data={
-                "options": ["I", "drink", "coffee", "in", "the", "morning.", "shoe"],
-                "correct_sequence": ["I", "drink", "coffee", "in", "the", "morning."]
-            },
-            order_index=2
-        ),
-        models.Exercise(
-            lesson_id=lesson3_1.id,
-            type="MATCH_PAIRS",
-            prompt="Match food items:",
-            data={
-                "pairs": [
-                    {"left": "Apple", "right": "Manzana"},
-                    {"left": "Bread", "right": "Pan"},
-                    {"left": "Coffee", "right": "Café"}
-                ]
-            },
-            order_index=3
-        ),
-        models.Exercise(
-            lesson_id=lesson3_1.id,
-            type="FILL_BLANK",
-            prompt="Complete the order:",
-            data={
-                "sentence_with_blank": "I would like a glass of ___, please.",
-                "options": ["water", "pencil", "hat"],
-                "correct_option": "water"
-            },
-            order_index=4
-        ),
-        models.Exercise(
-            lesson_id=lesson3_1.id,
-            type="TYPE_ANSWER",
-            prompt="Translate 'Manzana' to English:",
-            data={
-                "accepted_answers": ["apple", "Apple", "an apple", "An apple"]
-            },
-            order_index=5
-        )
-    ]
-    db.add_all(exercises3_1)
-
-    # Skill 4: Daily Phrases
+    # Skill 4: Food & Drink (खाना और पीना)
     skill4 = models.Skill(
-        unit_id=unit2.id,
-        title="Daily Phrases",
-        description="Talk about habits and routines.",
-        icon="coffee",
-        order_index=2
+        unit_id=unit1.id,
+        title="Food & Drink",
+        description="Learn food names in Hindi.",
+        icon="apple",
+        order_index=4
     )
     db.add(skill4)
     db.flush()
 
-    lesson4_1 = models.Lesson(
+    lesson4 = models.Lesson(
         skill_id=skill4.id,
-        title="Everyday Actions",
-        description="Read, write, walk, and sleep.",
+        title="Hindi Food Words",
+        description="Rotis, Chai, Paani, and Meals.",
         order_index=1,
-        xp_reward=10
+        xp_reward=15
     )
-    db.add(lesson4_1)
+    db.add(lesson4)
     db.flush()
 
-    exercises4_1 = [
+    exercises4 = [
         models.Exercise(
-            lesson_id=lesson4_1.id,
+            lesson_id=lesson4.id,
             type="MULTIPLE_CHOICE",
-            prompt="What is the verb for looking at words in a book?",
+            prompt="Select the word for 'Tea' in Hindi:",
             data={
                 "options": [
-                    {"id": "a", "text": "Read"},
-                    {"id": "b", "text": "Sleep"},
-                    {"id": "c", "text": "Jump"}
+                    {"id": "a", "text": "चाय (Chai)"},
+                    {"id": "b", "text": "पानी (Paani)"},
+                    {"id": "c", "text": "फल (Fal)"}
                 ],
                 "correct_option": "a"
             },
             order_index=1
         ),
         models.Exercise(
-            lesson_id=lesson4_1.id,
+            lesson_id=lesson4.id,
             type="WORD_BANK",
-            prompt="Construct: We read books every day.",
+            prompt="Construct: I drink tea (मैं चाय पीता हूँ).",
             data={
-                "options": ["We", "read", "books", "every", "day.", "flying"],
-                "correct_sequence": ["We", "read", "books", "every", "day."]
+                "options": ["मैं", "चाय", "पीता", "हूँ", "कार", "घर"],
+                "correct_sequence": ["मैं", "चाय", "पीता", "हूँ"]
             },
             order_index=2
         ),
         models.Exercise(
-            lesson_id=lesson4_1.id,
+            lesson_id=lesson4.id,
             type="MATCH_PAIRS",
-            prompt="Match actions:",
+            prompt="Match food words:",
             data={
                 "pairs": [
-                    {"left": "Read", "right": "Leer"},
-                    {"left": "Sleep", "right": "Dormir"},
-                    {"left": "Walk", "right": "Caminar"}
+                    {"left": "Chai", "right": "Tea"},
+                    {"left": "Doodh", "right": "Milk"},
+                    {"left": "Roti", "right": "Bread"},
+                    {"left": "Khaana", "right": "Food"}
                 ]
             },
             order_index=3
         ),
         models.Exercise(
-            lesson_id=lesson4_1.id,
+            lesson_id=lesson4.id,
             type="FILL_BLANK",
-            prompt="Fill in the blank:",
+            prompt="Fill in the blank: मुझे ___ पसंद है (I like tea).",
             data={
-                "sentence_with_blank": "I ___ eight hours every night.",
-                "options": ["sleep", "eat", "write"],
-                "correct_option": "sleep"
+                "sentence_with_blank": "मुझे ___ पसंद है",
+                "options": ["चाय", "कुर्सी", "जूता"],
+                "correct_option": "चाय"
             },
             order_index=4
         ),
         models.Exercise(
-            lesson_id=lesson4_1.id,
+            lesson_id=lesson4.id,
             type="TYPE_ANSWER",
-            prompt="Translate 'Leer' to English:",
+            prompt="Translate 'Chai' to English:",
             data={
-                "accepted_answers": ["read", "Read", "to read", "To read"]
+                "accepted_answers": ["tea", "Tea"]
             },
             order_index=5
-        )
-    ]
-    db.add_all(exercises4_1)
-
-    # --- Unit 3: Travel & Questions ---
-    unit3 = models.Unit(
-        course_id=course.id,
-        title="Travel & Questions",
-        description="Ask for directions and navigate travel situations.",
-        order_index=3
-    )
-    db.add(unit3)
-    db.flush()
-
-    # Skill 5: Travel
-    skill5 = models.Skill(
-        unit_id=unit3.id,
-        title="Travel & Navigation",
-        description="Airports, trains, hotels, and directions.",
-        icon="airplane",
-        order_index=1
-    )
-    db.add(skill5)
-    db.flush()
-
-    lesson5_1 = models.Lesson(
-        skill_id=skill5.id,
-        title="At the Station",
-        description="Tickets, trains, and destinations.",
-        order_index=1,
-        xp_reward=10
-    )
-    db.add(lesson5_1)
-    db.flush()
-
-    exercises5_1 = [
+        ),
         models.Exercise(
-            lesson_id=lesson5_1.id,
+            lesson_id=lesson4.id,
             type="MULTIPLE_CHOICE",
-            prompt="Select the word for 'Boleto/Billet':",
+            prompt="What is 'Milk' in Hindi?",
             data={
                 "options": [
-                    {"id": "a", "text": "Ticket"},
-                    {"id": "b", "text": "Window"},
-                    {"id": "c", "text": "Street"}
+                    {"id": "a", "text": "दूध (Doodh)"},
+                    {"id": "b", "text": "तेल (Tel)"},
+                    {"id": "c", "text": "नमक (Namak)"}
                 ],
                 "correct_option": "a"
             },
-            order_index=1
+            order_index=6
         ),
         models.Exercise(
-            lesson_id=lesson5_1.id,
+            lesson_id=lesson4.id,
             type="WORD_BANK",
-            prompt="Construct: Where is the train station?",
+            prompt="Construct: Give me water please.",
             data={
-                "options": ["Where", "is", "the", "train", "station?", "apple"],
-                "correct_sequence": ["Where", "is", "the", "train", "station?"]
+                "options": ["कृपया", "मुझे", "पानी", "दीजिए", "जूता"],
+                "correct_sequence": ["कृपया", "मुझे", "पानी", "दीजिए"]
             },
-            order_index=2
-        ),
-        models.Exercise(
-            lesson_id=lesson5_1.id,
-            type="MATCH_PAIRS",
-            prompt="Match travel words:",
-            data={
-                "pairs": [
-                    {"left": "Train", "right": "Tren"},
-                    {"left": "Ticket", "right": "Boleto"},
-                    {"left": "Airport", "right": "Aeropuerto"}
-                ]
-            },
-            order_index=3
-        ),
-        models.Exercise(
-            lesson_id=lesson5_1.id,
-            type="FILL_BLANK",
-            prompt="Fill in the blank:",
-            data={
-                "sentence_with_blank": "One ___ to London, please.",
-                "options": ["ticket", "cheese", "cloud"],
-                "correct_option": "ticket"
-            },
-            order_index=4
-        ),
-        models.Exercise(
-            lesson_id=lesson5_1.id,
-            type="TYPE_ANSWER",
-            prompt="Translate 'Dónde está' to English:",
-            data={
-                "accepted_answers": ["where is", "Where is", "where's", "Where's"]
-            },
-            order_index=5
+            order_index=7
         )
     ]
-    db.add_all(exercises5_1)
+    db.add_all(exercises4)
 
-    # 3. Default Learner (User ID = 1)
+    # 3. Default User
     default_user = models.User(
         id=1,
         username="demo_learner",
@@ -557,49 +381,27 @@ def seed_database(db: Session):
     db.add(default_user)
     db.flush()
 
-    # Initial Progress setup for Default Learner:
-    # Skill 1 is NOT_STARTED (AVAILABLE), all other skills LOCKED
-    skill_progress_1 = models.UserSkillProgress(
-        user_id=default_user.id,
-        skill_id=skill1.id,
-        status="NOT_STARTED"
-    )
-    db.add(skill_progress_1)
+    # Progress setup
+    db.add(models.UserSkillProgress(user_id=default_user.id, skill_id=skill1.id, status="NOT_STARTED"))
+    db.add(models.UserSkillProgress(user_id=default_user.id, skill_id=skill2.id, status="LOCKED"))
+    db.add(models.UserSkillProgress(user_id=default_user.id, skill_id=skill3.id, status="LOCKED"))
+    db.add(models.UserSkillProgress(user_id=default_user.id, skill_id=skill4.id, status="LOCKED"))
 
-    for sk in [skill2, skill3, skill4, skill5]:
-        db.add(models.UserSkillProgress(
-            user_id=default_user.id,
-            skill_id=sk.id,
-            status="LOCKED"
-        ))
+    db.add(models.UserLessonProgress(user_id=default_user.id, lesson_id=lesson1.id, status="NOT_STARTED"))
+    db.add(models.UserLessonProgress(user_id=default_user.id, lesson_id=lesson2.id, status="LOCKED"))
+    db.add(models.UserLessonProgress(user_id=default_user.id, lesson_id=lesson4.id, status="LOCKED"))
 
-    # Lesson 1_1 is NOT_STARTED, all other lessons LOCKED
-    lesson_progress_1_1 = models.UserLessonProgress(
-        user_id=default_user.id,
-        lesson_id=lesson1_1.id,
-        status="NOT_STARTED"
-    )
-    db.add(lesson_progress_1_1)
-
-    for les in [lesson1_2, lesson2_1, lesson3_1, lesson4_1, lesson5_1]:
-        db.add(models.UserLessonProgress(
-            user_id=default_user.id,
-            lesson_id=les.id,
-            status="LOCKED"
-        ))
-
-    # 4. Seed Leaderboard Competitors
+    # Seed Leaderboard
     leaderboard_users = [
         models.User(username="alex_pro", display_name="Alex", avatar_url="https://api.dicebear.com/7.x/bottts/svg?seed=Alex", total_xp=1250, weekly_xp=450, hearts=5, current_streak=7, longest_streak=12, daily_goal=50),
         models.User(username="maya_lingo", display_name="Maya", avatar_url="https://api.dicebear.com/7.x/bottts/svg?seed=Maya", total_xp=980, weekly_xp=390, hearts=5, current_streak=5, longest_streak=9, daily_goal=50),
         models.User(username="sam_dev", display_name="Sam", avatar_url="https://api.dicebear.com/7.x/bottts/svg?seed=Sam", total_xp=750, weekly_xp=310, hearts=4, current_streak=3, longest_streak=6, daily_goal=50),
         models.User(username="ryan_k", display_name="Ryan", avatar_url="https://api.dicebear.com/7.x/bottts/svg?seed=Ryan", total_xp=520, weekly_xp=240, hearts=5, current_streak=2, longest_streak=4, daily_goal=50),
-        models.User(username="elena_v", display_name="Elena", avatar_url="https://api.dicebear.com/7.x/bottts/svg?seed=Elena", total_xp=410, weekly_xp=180, hearts=5, current_streak=1, longest_streak=3, daily_goal=50),
     ]
     db.add_all(leaderboard_users)
 
     db.commit()
-    print("Database seeding completed successfully!")
+    print("Hindi course seeded successfully!")
 
 if __name__ == "__main__":
     session = SessionLocal()

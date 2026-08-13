@@ -5,17 +5,17 @@ import { LeftSidebar } from '@/components/layout/LeftSidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { RightSidebar } from '@/components/layout/RightSidebar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
-import { getLeaderboard, LeaderboardEntry, getCurrentUser, User } from '@/lib/api/client';
+import { getLeaderboard, LeaderboardUser, getCurrentUser, User } from '@/lib/api/client';
 import { Trophy, ShieldAlert } from 'lucide-react';
 
 export default function LeaderboardPage() {
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [entries, setEntries] = useState<LeaderboardUser[]>([]);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     async function loadData() {
-      const [lbData, userData] = await Promise.all([getLeaderboard(), getCurrentUser()]);
-      setEntries(lbData);
+      const [lbResponse, userData] = await Promise.all([getLeaderboard(), getCurrentUser()]);
+      setEntries(lbResponse.leaderboard);
       setUser(userData);
     }
     loadData();
@@ -65,10 +65,10 @@ export default function LeaderboardPage() {
                       {entry.username.charAt(0)}
                     </div>
 
-                    <span className="font-extrabold text-[#4b4b4b] text-base">{entry.username}</span>
+                    <span className="font-extrabold text-[#4b4b4b] text-base">{entry.display_name || entry.username}</span>
                   </div>
 
-                  <span className="font-extrabold text-[#777] text-sm">{entry.xp} XP</span>
+                  <span className="font-extrabold text-[#777] text-sm">{entry.weekly_xp} XP</span>
                 </div>
               ))}
             </div>

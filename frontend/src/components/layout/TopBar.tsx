@@ -7,17 +7,17 @@ interface TopBarProps {
 }
 
 export const TopBar: React.FC<TopBarProps> = ({ user }) => {
-  const streak = user?.streak_count ?? 5;
-  const xp = user?.xp_total ?? 350;
+  const streak = user?.current_streak ?? 0;
+  const xp = user?.total_xp ?? 0;
   const hearts = user?.hearts ?? 5;
-  const gems = user?.gems ?? 420;
+  const gems = user?.gems ?? 500;
 
   return (
     <header className="sticky top-0 bg-white/95 backdrop-blur border-b-2 border-[#e5e5e5] h-[64px] px-6 flex items-center justify-between z-20 w-full max-w-[1056px] mx-auto select-none">
       {/* Course Flag Selector */}
       <button className="flex items-center gap-3 px-3 py-1.5 rounded-xl hover:bg-[#f7f7f7] border-2 border-transparent hover:border-[#e5e5e5] transition-all">
-        <span className="text-2xl">🇪🇸</span>
-        <span className="font-bold text-[#777] text-sm uppercase tracking-wider">Spanish</span>
+        <span className="text-2xl">🇮🇳</span>
+        <span className="font-bold text-[#777] text-sm uppercase tracking-wider">Hindi</span>
       </button>
 
       {/* Stats indicators */}

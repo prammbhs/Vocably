@@ -4,7 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Heart, CheckCircle2, XCircle, Volume2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { Lesson, Exercise, submitLessonCompletion } from '@/lib/api/client';
+import {
+  Lesson,
+  Exercise,
+  submitExerciseAnswer,
+  submitLessonCompletion,
+  getCurrentUser,
+  LessonCompletionResponse,
+} from '@/lib/api/client';
 
 interface LessonPlayerProps {
   lesson: Lesson;
@@ -15,18 +22,38 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hearts, setHearts] = useState(5);
+  const [totalAttempts, setTotalAttempts] = useState(0);
+  const [correctAttempts, setCorrectAttempts] = useState(0);
+
+  // Exercise input states
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
   const [matchedPairs, setMatchedPairs] = useState<Record<string, string>>({});
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [typedAnswer, setTypedAnswer] = useState('');
 
+  // Status & Feedback states
   const [status, setStatus] = useState<'answering' | 'correct' | 'incorrect'>('answering');
+  const [feedbackMessage, setFeedbackMessage] = useState<string>('');
+  const [correctAnswerTip, setCorrectAnswerTip] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [xpEarned, setXpEarned] = useState(0);
+  const [completionData, setCompletionData] = useState<LessonCompletionResponse | null>(null);
 
   const currentExercise: Exercise = lesson.exercises[currentIndex];
-  const progressPercent = ((currentIndex) / lesson.exercises.length) * 100;
+  const progressPercent = (currentIndex / lesson.exercises.length) * 100;
+
+  // Load initial hearts from backend user
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const u = await getCurrentUser();
+        setHearts(u.hearts);
+      } catch (err) {
+        console.warn('Failed to load user hearts:', err);
+      }
+    }
+    loadUser();
+  }, []);
 
   // Reset exercise local state when step changes
   useEffect(() => {
@@ -36,12 +63,14 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
     setSelectedLeft(null);
     setTypedAnswer('');
     setStatus('answering');
+    setFeedbackMessage('');
+    setCorrectAnswerTip(null);
   }, [currentIndex]);
 
   const speakText = (text: string) => {
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'es-ES';
+      utterance.lang = 'en-US';
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -58,31 +87,45 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
   const handlePairTap = (left: string, right: string) => {
     if (status !== 'answering') return;
     setMatchedPairs((prev) => ({ ...prev, [left]: right }));
+    setSelectedLeft(null);
   };
 
-  const validateAnswer = () => {
-    if (status !== 'answering') return;
+  const validateAnswer = async () => {
+    if (status !== 'answering' || !currentExercise) return;
 
-    let isRight = false;
-    const answer = currentExercise.correct_answer.trim().toLowerCase();
+    let payload: any = {};
+    const exType = currentExercise.type;
 
-    if (currentExercise.type === 'multiple_choice' || currentExercise.type === 'fill_in_blank') {
-      isRight = selectedOption?.trim().toLowerCase() === answer;
-    } else if (currentExercise.type === 'translate') {
-      isRight = selectedWords.join(' ').trim().toLowerCase() === answer;
-    } else if (currentExercise.type === 'type_answer') {
-      isRight = typedAnswer.trim().toLowerCase() === answer;
-    } else if (currentExercise.type === 'match_pairs') {
-      isRight = Object.keys(matchedPairs).length === (currentExercise.pairs?.length || 0);
+    if (exType === 'MULTIPLE_CHOICE') {
+      payload = { option_id: selectedOption };
+    } else if (exType === 'WORD_BANK') {
+      payload = { sequence: selectedWords };
+    } else if (exType === 'FILL_BLANK') {
+      payload = { selected_word: selectedOption };
+    } else if (exType === 'TYPE_ANSWER') {
+      payload = { text: typedAnswer };
+    } else if (exType === 'MATCH_PAIRS') {
+      payload = {
+        pairs: Object.entries(matchedPairs).map(([left, right]) => ({ left, right })),
+      };
     }
 
-    if (isRight) {
-      setStatus('correct');
-      setXpEarned((prev) => prev + 10);
-      speakText(answer);
-    } else {
-      setStatus('incorrect');
-      setHearts((prev) => Math.max(0, prev - 1));
+    try {
+      const result = await submitExerciseAnswer(lesson.id, currentExercise.id, payload);
+      setHearts(result.hearts_remaining);
+      setTotalAttempts((prev) => prev + 1);
+
+      if (result.correct) {
+        setStatus('correct');
+        setCorrectAttempts((prev) => prev + 1);
+        setFeedbackMessage(result.feedback || "Good job!");
+      } else {
+        setStatus('incorrect');
+        setFeedbackMessage(result.feedback || "Not quite!");
+        setCorrectAnswerTip(result.correct_answer || null);
+      }
+    } catch (err) {
+      console.error('Error submitting exercise answer:', err);
     }
   };
 
@@ -91,13 +134,21 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
       setCurrentIndex((prev) => prev + 1);
     } else {
       // Completed lesson
+      try {
+        const res = await submitLessonCompletion(lesson.id);
+        setCompletionData(res);
+      } catch (err) {
+        console.error('Error completing lesson:', err);
+      }
       setIsCompleted(true);
       confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
-      await submitLessonCompletion(lesson.id, xpEarned + 10);
     }
   };
 
   if (isCompleted) {
+    const accuracy = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 100;
+    const xpGained = completionData?.xp_earned ?? lesson.xp_reward;
+
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center select-none">
         <div className="text-8xl mb-6 animate-bounce">🎉</div>
@@ -109,11 +160,11 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
         <div className="flex gap-4 mb-12">
           <div className="bg-[#ffc800] text-white p-5 rounded-2xl border-b-4 border-[#e5a000] w-36">
             <span className="text-xs font-black uppercase tracking-wider block opacity-90">Total XP</span>
-            <span className="text-3xl font-black">+{xpEarned + 10}</span>
+            <span className="text-3xl font-black">+{xpGained}</span>
           </div>
           <div className="bg-[#58cc02] text-white p-5 rounded-2xl border-b-4 border-[#46a302] w-36">
             <span className="text-xs font-black uppercase tracking-wider block opacity-90">Accuracy</span>
-            <span className="text-3xl font-black">100%</span>
+            <span className="text-3xl font-black">{accuracy}%</span>
           </div>
         </div>
 
@@ -127,10 +178,13 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
     );
   }
 
+  const exType = currentExercise?.type;
   const isCheckDisabled =
-    (currentExercise.type === 'multiple_choice' || currentExercise.type === 'fill_in_blank') && !selectedOption ||
-    (currentExercise.type === 'translate' && selectedWords.length === 0) ||
-    (currentExercise.type === 'type_answer' && !typedAnswer.trim());
+    ((exType === 'MULTIPLE_CHOICE' || exType === 'FILL_BLANK') && !selectedOption) ||
+    (exType === 'WORD_BANK' && selectedWords.length === 0) ||
+    (exType === 'TYPE_ANSWER' && !typedAnswer.trim()) ||
+    (exType === 'MATCH_PAIRS' &&
+      Object.keys(matchedPairs).length !== (currentExercise?.data?.pairs?.length || 0));
 
   return (
     <div className="min-h-screen bg-white flex flex-col justify-between select-none">
@@ -161,7 +215,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
       {/* Main Exercise Content Container */}
       <main className="max-w-[600px] w-full mx-auto px-6 flex-1 flex flex-col justify-center py-6">
         <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-2xl font-extrabold text-[#4b4b4b]">{currentExercise.prompt}</h2>
+          <h2 className="text-2xl font-extrabold text-[#4b4b4b]">{currentExercise?.prompt}</h2>
           <button
             onClick={() => speakText(currentExercise.prompt)}
             className="p-2 rounded-xl bg-[#1cb0f6]/10 text-[#1cb0f6] hover:bg-[#1cb0f6]/20 transition-all"
@@ -171,26 +225,30 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
         </div>
 
         {/* Multiple Choice & Fill in the Blank */}
-        {(currentExercise.type === 'multiple_choice' || currentExercise.type === 'fill_in_blank') && (
+        {(exType === 'MULTIPLE_CHOICE' || exType === 'FILL_BLANK') && (
           <div className="grid grid-cols-2 gap-4">
-            {currentExercise.options?.map((opt) => (
-              <button
-                key={opt}
-                onClick={() => status === 'answering' && setSelectedOption(opt)}
-                className={`p-5 rounded-2xl border-2 border-b-4 font-bold text-lg text-left transition-all ${
-                  selectedOption === opt
-                    ? 'border-[#84d8ff] bg-[#ddf4ff] text-[#1cb0f6] border-b-[#1cb0f6]'
-                    : 'border-[#e5e5e5] text-[#4b4b4b] hover:bg-[#f7f7f7]'
-                }`}
-              >
-                {opt}
-              </button>
-            ))}
+            {currentExercise.data.options?.map((opt: any) => {
+              const optId = typeof opt === 'object' ? opt.id : opt;
+              const optText = typeof opt === 'object' ? opt.text : opt;
+              return (
+                <button
+                  key={optId}
+                  onClick={() => status === 'answering' && setSelectedOption(optId)}
+                  className={`p-5 rounded-2xl border-2 border-b-4 font-bold text-lg text-left transition-all ${
+                    selectedOption === optId
+                      ? 'border-[#84d8ff] bg-[#ddf4ff] text-[#1cb0f6] border-b-[#1cb0f6]'
+                      : 'border-[#e5e5e5] text-[#4b4b4b] hover:bg-[#f7f7f7]'
+                  }`}
+                >
+                  {optText}
+                </button>
+              );
+            })}
           </div>
         )}
 
         {/* Translate / Word Bank */}
-        {currentExercise.type === 'translate' && (
+        {exType === 'WORD_BANK' && (
           <div>
             {/* Selected words drop line */}
             <div className="min-h-[70px] border-b-2 border-[#e5e5e5] mb-8 flex flex-wrap gap-2 p-2 items-center">
@@ -207,7 +265,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
 
             {/* Word bank pool */}
             <div className="flex flex-wrap gap-3 justify-center">
-              {currentExercise.options?.map((word) => {
+              {currentExercise.data.options?.map((word: any) => {
                 const isSelected = selectedWords.includes(word);
                 return (
                   <button
@@ -229,20 +287,20 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
         )}
 
         {/* Type Answer */}
-        {currentExercise.type === 'type_answer' && (
+        {exType === 'TYPE_ANSWER' && (
           <textarea
             value={typedAnswer}
             onChange={(e) => setTypedAnswer(e.target.value)}
             disabled={status !== 'answering'}
-            placeholder="Type your response in Spanish..."
+            placeholder="Type your response in English..."
             className="w-full h-36 p-4 rounded-2xl border-2 border-[#e5e5e5] focus:border-[#1cb0f6] outline-none font-bold text-lg text-[#4b4b4b] resize-none bg-[#f7f7f7]"
           />
         )}
 
         {/* Match Pairs */}
-        {currentExercise.type === 'match_pairs' && (
+        {exType === 'MATCH_PAIRS' && (
           <div className="grid grid-cols-2 gap-4">
-            {currentExercise.pairs?.map((pair) => {
+            {currentExercise.data.pairs?.map((pair: any) => {
               const isMatched = matchedPairs[pair.left] === pair.right;
               const isSelected = selectedLeft === pair.left;
 
@@ -295,16 +353,18 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lesson }) => {
             <div className="flex items-center gap-4 text-[#58cc02]">
               <CheckCircle2 className="w-10 h-10 fill-[#58cc02] text-white" />
               <div>
-                <h3 className="text-xl font-extrabold">Good job!</h3>
-                <p className="text-sm font-bold text-[#58cc02]/80">Excellent translation</p>
+                <h3 className="text-xl font-extrabold">{feedbackMessage}</h3>
+                <p className="text-sm font-bold text-[#58cc02]/80">Great job!</p>
               </div>
             </div>
           ) : status === 'incorrect' ? (
             <div className="flex items-center gap-4 text-[#ff4b4b]">
               <XCircle className="w-10 h-10 fill-[#ff4b4b] text-white" />
               <div>
-                <h3 className="text-xl font-extrabold">Correct answer:</h3>
-                <p className="text-base font-bold text-[#ff4b4b]">{currentExercise.correct_answer}</p>
+                <h3 className="text-xl font-extrabold">{feedbackMessage}</h3>
+                {correctAnswerTip && (
+                  <p className="text-base font-bold text-[#ff4b4b]">Correct answer: {correctAnswerTip}</p>
+                )}
               </div>
             </div>
           ) : (
