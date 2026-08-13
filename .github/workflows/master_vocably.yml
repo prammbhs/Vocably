@@ -39,10 +39,7 @@ jobs:
             requirements.txt
             startup.sh
             Procfile
-            !backend/.venv/
-            !backend/.pytest_cache/
-            !backend/__pycache__/
-            !backend/**/*.pyc
+            antenv/
             !.git/
             !frontend/
 
