@@ -14,16 +14,9 @@ def test_skill_and_lesson_progression_unlocking(client):
     client.post("/api/lessons/1/complete")
 
     path_after_lesson1 = client.get("/api/course/path").json()
-    skill1_after = path_after_lesson1["units"][0]["skills"][0]
-    assert skill1_after["status"] == "IN_PROGRESS"
+    skills_after = path_after_lesson1["units"][0]["skills"]
 
-    # Complete Lesson 2 in Skill 1
-    client.post("/api/lessons/2/complete")
-
-    path_after_skill1 = client.get("/api/course/path").json()
-    skills_after = path_after_skill1["units"][0]["skills"]
-
-    # Skill 1 is now COMPLETED
+    # Skill 1 is now COMPLETED (since Skill 1 has 1 lesson)
     assert skills_after[0]["status"] == "COMPLETED"
     # Skill 2 is now UNLOCKED (NOT_STARTED / AVAILABLE)!
     assert skills_after[1]["status"] in ["NOT_STARTED", "AVAILABLE"]

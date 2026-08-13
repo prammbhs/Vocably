@@ -19,6 +19,7 @@ Built for the **Fullstack SDE Assignment (Duolingo Clone)** using **Next.js 16 (
   - [1. Backend Setup](#1-backend-setup)
   - [2. Frontend Setup](#2-frontend-setup)
 - [Running Automated Tests](#-running-automated-tests)
+- [License](#-license)
 
 ---
 
@@ -240,7 +241,7 @@ Swagger / OpenAPI Docs: `http://localhost:8000/docs`
 ## 💡 Assumptions Made
 
 1. **Authentication**: Authentication is simplified; the application operates with a seeded default learner (`Paramjit`) to facilitate rapid evaluation without login barriers.
-2. **Seeded Content**: Seeded with an **English Foundations** course containing 3 Units, 5 Skills, 10+ Lessons, and 50+ Exercises covering all 5 exercise formats.
+2. **Seeded Content**: Seeded with an **Hindi Essentials** course containing Units, Skills, Lessons, and 20+ Exercises covering all 5 exercise formats.
 3. **Audio & Gems**: Audio clips and Gems currency are mocked/placeholders in alignment with assignment guidelines.
 4. **Streak Calculation**: Streaks are evaluated on daily activity timestamps stored in UTC date format.
 
@@ -310,7 +311,6 @@ Swagger / OpenAPI Docs: `http://localhost:8000/docs`
    ```
    Open `http://localhost:3000` in your web browser to play Vocably!
 
----
 
 ## 🧪 Running Automated Tests
 
@@ -329,3 +329,9 @@ pytest -v
 - ✅ Daily goal tracking & accumulation
 - ✅ Sequential progression unlocking (skill & lesson locks)
 - ✅ SQLite database persistence across sessions
+
+---
+
+## 📄 License
+
+This project is created strictly for **educational purposes** as part of an engineering portfolio / software assignment. All Duolingo visual styling, mascot flourishes, and brand references belong to Duolingo, Inc.

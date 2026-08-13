@@ -20,21 +20,21 @@ def test_multiple_choice_correct_and_incorrect(client, db_session):
     assert res_wrong.status_code == 200
     data_wrong = res_wrong.json()
     assert data_wrong["correct"] is False
-    assert data_wrong["correct_answer"] == "Hello"
+    assert data_wrong["correct_answer"] == "नमस्ते (Namaste)"
     assert data_wrong["hearts_remaining"] == 4
 
 def test_word_bank_exercise(client):
-    # Exercise 2 in Lesson 1 is WORD_BANK ("Hello,", "how", "are", "you?")
+    # Exercise 2 in Lesson 1 is WORD_BANK
     res = client.post(
         "/api/lessons/1/exercises/2/answer",
-        json={"answer": {"sequence": ["Hello,", "how", "are", "you?"]}}
+        json={"answer": {"sequence": ["नमस्ते,", "आप", "कैसे", "हैं?"]}}
     )
     assert res.status_code == 200
     assert res.json()["correct"] is True
 
     res_wrong = client.post(
         "/api/lessons/1/exercises/2/answer",
-        json={"answer": {"sequence": ["how", "Hello,"]}}
+        json={"answer": {"sequence": ["आप", "नमस्ते,"]}}
     )
     assert res_wrong.status_code == 200
     assert res_wrong.json()["correct"] is False
@@ -44,28 +44,29 @@ def test_match_pairs_exercise(client):
     res = client.post(
         "/api/lessons/1/exercises/3/answer",
         json={"answer": {"pairs": [
-            {"left": "Hello", "right": "Hola"},
-            {"left": "Goodbye", "right": "Adiós"},
-            {"left": "Please", "right": "Por favor"}
+            {"left": "Namaste", "right": "Hello"},
+            {"left": "Dhanyavaad", "right": "Thank you"},
+            {"left": "Haan", "right": "Yes"},
+            {"left": "Nahi", "right": "No"}
         ]}}
     )
     assert res.status_code == 200
     assert res.json()["correct"] is True
 
 def test_fill_blank_exercise(client):
-    # Exercise 4 in Lesson 1 is FILL_BLANK ("Good")
+    # Exercise 4 in Lesson 1 is FILL_BLANK ("मेरा (Mera)")
     res = client.post(
         "/api/lessons/1/exercises/4/answer",
-        json={"answer": {"selected_word": "Good"}}
+        json={"answer": {"selected_word": "मेरा (Mera)"}}
     )
     assert res.status_code == 200
     assert res.json()["correct"] is True
 
 def test_type_answer_exercise(client):
-    # Exercise 5 in Lesson 1 is TYPE_ANSWER ("hello")
+    # Exercise 5 in Lesson 1 is TYPE_ANSWER ("thank you")
     res = client.post(
         "/api/lessons/1/exercises/5/answer",
-        json={"answer": {"text": "  HELLO "}}
+        json={"answer": {"text": "  THANK YOU "}}
     )
     assert res.status_code == 200
     assert res.json()["correct"] is True

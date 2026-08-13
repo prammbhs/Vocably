@@ -8,18 +8,18 @@ def test_lesson_completion_awards_xp(client):
     assert res.status_code == 200
     data = res.json()
     assert data["lesson_completed"] is True
-    assert data["xp_earned"] == 10
-    assert data["total_xp"] == 10
+    assert data["xp_earned"] == 15
+    assert data["total_xp"] == 15
 
 def test_duplicate_completion_idempotency(client):
     # Complete lesson 1 first time
     res1 = client.post("/api/lessons/1/complete")
-    assert res1.json()["xp_earned"] == 10
-    assert res1.json()["total_xp"] == 10
+    assert res1.json()["xp_earned"] == 15
+    assert res1.json()["total_xp"] == 15
 
     # Complete lesson 1 second time
     res2 = client.post("/api/lessons/1/complete")
     assert res2.status_code == 200
     assert res2.json()["lesson_completed"] is True
     assert res2.json()["xp_earned"] == 0  # No duplicate XP
-    assert res2.json()["total_xp"] == 10  # Total XP unchanged
+    assert res2.json()["total_xp"] == 15  # Total XP unchanged

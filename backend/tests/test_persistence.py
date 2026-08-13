@@ -8,7 +8,7 @@ def test_data_persists_in_database(client, db_session):
 
     # Query database directly using session
     user = db_session.query(User).filter_by(id=1).first()
-    assert user.total_xp == 10
+    assert user.total_xp == 15
 
     lesson_progress = db_session.query(UserLessonProgress).filter_by(
         user_id=1, lesson_id=1
