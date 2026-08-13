@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+:root {
+  --primary-green: #58CC02;
+  --dark-green: #58A700;
+  --light-blue: #1CB0F6;
+  --dark-blue: #1899D6;
+  --yellow: #FFC800;
+  --orange: #FF9600;
+  --red: #FF4B4B;
+  --purple: #CE82FF;
+  --white: #FFFFFF;
+  --background: #FFFFFF;
+  --soft-gray: #F7F7F7;
+  --border-color: #E5E5E5;
+  --text-dark: #3C3C3C;
+  --text-muted: #777777;
+  --locked-gray: #D7D7D7;
+  --locked-icon: #AFAFAF;
+  --locked-depth: #B5B5B5;
+}
+
+@theme {
+  --color-vocably-green: #58CC02;
+  --color-vocably-green-dark: #58A700;
+  --color-vocably-blue: #1CB0F6;
+  --color-vocably-blue-dark: #1899D6;
+  --color-vocably-yellow: #FFC800;
+  --color-vocably-orange: #FF9600;
+  --color-vocably-red: #FF4B4B;
+  --color-vocably-purple: #CE82FF;
+  --color-vocably-gray-soft: #F7F7F7;
+  --color-vocably-border: #E5E5E5;
+  --color-vocably-dark: #3C3C3C;
+  --color-vocably-muted: #777777;
+  --color-vocably-locked: #D7D7D7;
+  --color-vocably-locked-dark: #B5B5B5;
+  --font-nunito: 'Nunito', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-dark);
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tactile 3D Button Utilities */
+.btn-3d {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-radius: 16px;
+  transition: all 0.1s ease;
+  user-select: none;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.btn-3d:active {
+  transform: translateY(4px);
+  box-shadow: none !important;
+}
+
+.btn-green {
+  background-color: var(--primary-green);
+  color: var(--white);
+  box-shadow: 0 4px 0 0 var(--dark-green);
+}
+
+.btn-green:hover {
+  filter: brightness(1.05);
+}
+
+.btn-blue {
+  background-color: var(--light-blue);
+  color: var(--white);
+  box-shadow: 0 4px 0 0 var(--dark-blue);
+}
+
+.btn-white {
+  background-color: var(--white);
+  color: var(--text-dark);
+  border: 2px solid var(--border-color);
+  box-shadow: 0 4px 0 0 var(--border-color);
+}
+
+.btn-white:hover {
+  background-color: var(--soft-gray);
+}
+
+.btn-gray {
+  background-color: var(--locked-gray);
+  color: var(--locked-icon);
+  box-shadow: 0 4px 0 0 var(--locked-depth);
+  cursor: not-allowed;
+}
+
+/* Winding Path Animation */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.active-skill-pulse {
+  animation: pulse-ring 2s infinite ease-in-out;
+}
