@@ -12,7 +12,6 @@ export const LeftSidebar: React.FC = () => {
     { name: 'LEADERBOARD', href: '/leaderboard', icon: Trophy, activeColor: 'text-[#ffc800]' },
     { name: 'QUESTS', href: '/quests', icon: Target, activeColor: 'text-[#ff9600]' },
     { name: 'PROFILE', href: '/profile', icon: User, activeColor: 'text-[#ff4b4b]' },
-    { name: 'MORE', href: '/more', icon: MoreHorizontal, activeColor: 'text-[#ce82ff]' },
   ];
 
   return (
