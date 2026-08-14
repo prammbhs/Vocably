@@ -1,6 +1,8 @@
 # Vocably 🦉 - Duolingo Web App Clone
 
 🌐 **Live Demo & Deployed App:** [https://vocably.paramjit.tech/](https://vocably.paramjit.tech/)
+<img width="2863" height="1789" alt="image" src="https://github.com/user-attachments/assets/3f5012cc-eb22-4b9b-b8c3-639beb96d669" />
+
 
 > **Vocably** is a feature-complete, modern full-stack web application that replicates Duolingo's iconic design system, user experience, core interactive lesson loop, and gamification mechanics.
 
