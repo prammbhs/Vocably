@@ -32,7 +32,10 @@ def seed_database(db: Session):
     db.add(l1); db.flush()
     db.add_all([
         models.Exercise(lesson_id=l1.id, type="MULTIPLE_CHOICE", prompt="Select 'Hello':", data={"options": [{"id": "a", "text": "नमस्ते (Namaste)"}, {"id": "b", "text": "पानी (Paani)"}], "correct_option": "a"}, order_index=1),
-        models.Exercise(lesson_id=l1.id, type="TYPE_ANSWER", prompt="Translate 'Dhanyavaad':", data={"accepted_answers": ["thank you", "thankyou", "thanks", "thank-you"]}, order_index=2),
+        models.Exercise(lesson_id=l1.id, type="WORD_BANK", prompt="Translate: Hello, how are you?", data={"tokens": ["नमस्ते,", "आप", "कैसे", "हैं?", "मैं", "अच्छा"], "correct_sequence": ["नमस्ते,", "आप", "कैसे", "हैं?"]}, order_index=2),
+        models.Exercise(lesson_id=l1.id, type="MATCH_PAIRS", prompt="Match the corresponding pairs:", data={"pairs": [{"left": "Namaste", "right": "Hello"}, {"left": "Dhanyavaad", "right": "Thank you"}, {"left": "Haan", "right": "Yes"}, {"left": "Nahi", "right": "No"}]}, order_index=3),
+        models.Exercise(lesson_id=l1.id, type="FILL_BLANK", prompt="___ naam Ramesh hai.", data={"options": ["मेरा (Mera)", "आप (Aap)", "पानी (Paani)"], "correct_option": "मेरा (Mera)"}, order_index=4),
+        models.Exercise(lesson_id=l1.id, type="TYPE_ANSWER", prompt="Translate 'Dhanyavaad':", data={"accepted_answers": ["thank you", "thankyou", "thanks", "thank-you"]}, order_index=5),
     ])
 
     # Skill 2: Basics 1
