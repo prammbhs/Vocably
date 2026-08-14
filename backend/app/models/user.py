@@ -15,6 +15,8 @@ class User(Base):
     total_xp: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     weekly_xp: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     hearts: Mapped[int] = mapped_column(Integer, default=5, nullable=False)
+    gems: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    claimed_quests_json: Mapped[Optional[str]] = mapped_column(String(500), default="[]", nullable=True)
 
     current_streak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     longest_streak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)

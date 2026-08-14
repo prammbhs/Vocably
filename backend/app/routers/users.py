@@ -19,7 +19,17 @@ def get_current_user(db: Session = Depends(get_db)) -> User:
 
 @router.get("/me", response_model=UserResponse)
 def get_me(user: User = Depends(get_current_user)):
-    return user
+    import json
+    claimed_quests = []
+    if user.claimed_quests_json:
+        try:
+            claimed_quests = json.loads(user.claimed_quests_json)
+        except Exception:
+            claimed_quests = []
+    
+    res = UserResponse.model_validate(user)
+    res.claimed_quests = claimed_quests
+    return res
 
 @router.get("/me/progress", response_model=UserProgressResponse)
 def get_me_progress(

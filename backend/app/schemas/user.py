@@ -15,6 +15,8 @@ class UserResponse(UserBase):
     total_xp: int
     weekly_xp: int
     hearts: int
+    gems: int = 500
+    claimed_quests: List[int] = []
     current_streak: int
     longest_streak: int
     last_active_date: Optional[date] = None

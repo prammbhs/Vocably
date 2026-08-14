@@ -82,9 +82,16 @@ def verify_answer(
         correct_answer_str = expected_word
 
     elif ex_type == "TYPE_ANSWER":
-        submitted_text = (answer_data.get("text") or "").strip().lower()
-        accepted_answers = [ans.strip().lower() for ans in ex_data.get("accepted_answers", [])]
-        is_correct = (submitted_text in accepted_answers)
+        import re
+
+        def normalize_string(s: str) -> str:
+            # Lowercase, strip punctuation, collapse multiple whitespace
+            cleaned = re.sub(r'[^\w\s]', '', s.lower())
+            return " ".join(cleaned.split())
+
+        submitted_text = normalize_string(answer_data.get("text") or "")
+        accepted_answers = [normalize_string(ans) for ans in ex_data.get("accepted_answers", [])]
+        is_correct = (submitted_text in accepted_answers and len(submitted_text) > 0)
         correct_answer_str = ex_data.get("accepted_answers", [""])[0]
 
     else:
@@ -218,11 +225,14 @@ def complete_lesson(db: Session, user: User, lesson_id: int) -> LessonCompletion
         # Unlock next skill if current skill completed
         next_skill_unlocked = False
         if all_lessons_done:
-            # Find next skill in order
+            # Cascaded unlocking of next skills
             unit_skills = sorted(skill.unit.skills, key=lambda s: s.order_index)
             curr_idx = next((i for i, s in enumerate(unit_skills) if s.id == skill.id), -1)
-            if curr_idx != -1 and curr_idx + 1 < len(unit_skills):
-                next_sk = unit_skills[curr_idx + 1]
+
+            # Traverse forward through subsequent skills in the unit
+            search_idx = curr_idx + 1
+            while search_idx < len(unit_skills):
+                next_sk = unit_skills[search_idx]
                 next_sp = db.query(UserSkillProgress).filter_by(user_id=user.id, skill_id=next_sk.id).first()
                 if not next_sp:
                     db.add(UserSkillProgress(user_id=user.id, skill_id=next_sk.id, status="NOT_STARTED"))
@@ -231,7 +241,7 @@ def complete_lesson(db: Session, user: User, lesson_id: int) -> LessonCompletion
                     next_sp.status = "NOT_STARTED"
                     next_skill_unlocked = True
 
-                # Unlock first lesson of next skill
+                # Unlock first lesson of next skill if it has lessons
                 if next_sk.lessons:
                     first_l = sorted(next_sk.lessons, key=lambda l: l.order_index)[0]
                     first_lp = db.query(UserLessonProgress).filter_by(user_id=user.id, lesson_id=first_l.id).first()
@@ -239,6 +249,10 @@ def complete_lesson(db: Session, user: User, lesson_id: int) -> LessonCompletion
                         db.add(UserLessonProgress(user_id=user.id, lesson_id=first_l.id, status="NOT_STARTED"))
                     elif first_lp.status == "LOCKED":
                         first_lp.status = "NOT_STARTED"
+                    break
+                else:
+                    # If skill has no lessons (e.g. chest milestone), continue loop to also unlock the following skill!
+                    search_idx += 1
 
         db.commit()
         db.refresh(user)

@@ -8,7 +8,9 @@ skills-lock.json
 .venv
 venv
 *.pyc
-
+*.db
+lingua_loop.db
+backend/lingua_loop.db
 
 # dependencies
 node_modules

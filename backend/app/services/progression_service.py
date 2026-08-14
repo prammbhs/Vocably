@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models import Course, Unit, Skill, Lesson, UserSkillProgress, UserLessonProgress
+from app.models import Course, Unit, Skill, Lesson, UserSkillProgress, UserLessonProgress, User
 from app.schemas.course import CoursePathResponse, UnitPathResponse, SkillPathResponse
 from app.schemas.lesson import LessonResponse
 
@@ -40,7 +40,27 @@ def get_course_path(db: Session, user_id: int) -> CoursePathResponse:
             1 for l in skill.lessons if lesson_progress_map.get(l.id) == "COMPLETED"
         )
 
-        if completed_lessons == total_lessons and total_lessons > 0:
+        is_chest = (skill.icon == "chest")
+
+        if is_chest:
+            import json
+            user = db.query(User).filter_by(id=user_id).first()
+            claimed_ids = []
+            if user and user.claimed_quests_json:
+                try:
+                    claimed_ids = json.loads(user.claimed_quests_json)
+                except Exception:
+                    claimed_ids = []
+            
+            # Chest is ONLY accessible if previous skill is completed!
+            chest_claimed = (1 in claimed_ids)  # Chest milestone quest
+            if not prev_skill_completed:
+                effective_status = "LOCKED"
+            elif chest_claimed:
+                effective_status = "COMPLETED"
+            else:
+                effective_status = "NOT_STARTED"
+        elif completed_lessons == total_lessons and total_lessons > 0:
             effective_status = "COMPLETED"
         elif completed_lessons > 0 or stored_status == "IN_PROGRESS":
             effective_status = "IN_PROGRESS"

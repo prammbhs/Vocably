@@ -179,9 +179,42 @@ export async function getLeaderboard(): Promise<LeaderboardResponse> {
   return await fetchAPI<LeaderboardResponse>('/leaderboard');
 }
 
+export interface Quest {
+  id: number;
+  title: string;
+  description: string;
+  current: number;
+  total: number;
+  reward: string;
+  reward_type: 'gems' | 'hearts';
+  reward_amount: number;
+  claimed: boolean;
+}
+
+export interface ClaimQuestResponse {
+  message: string;
+  quest_id: number;
+  claimed: boolean;
+  reward_type: string;
+  reward_amount: number;
+  gems: number;
+  hearts: number;
+}
+
 // 7. Practice Heart Refill endpoint
 export async function practiceHeartRefill(): Promise<{ message: string; hearts_restored: number; hearts_remaining: number }> {
   return await fetchAPI<{ message: string; hearts_restored: number; hearts_remaining: number }>('/practice', {
+    method: 'POST',
+  });
+}
+
+// 8. Quests endpoints
+export async function getQuests(): Promise<{ quests: Quest[] }> {
+  return await fetchAPI<{ quests: Quest[] }>('/quests');
+}
+
+export async function claimQuest(questId: number): Promise<ClaimQuestResponse> {
+  return await fetchAPI<ClaimQuestResponse>(`/quests/${questId}/claim`, {
     method: 'POST',
   });
 }

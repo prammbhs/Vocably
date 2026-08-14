@@ -15,7 +15,7 @@ export const MobileBottomNav: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-[64px] bg-white border-t-2 border-[#e5e5e5] flex items-center justify-around z-40 md:hidden select-none px-2">
+    <nav className="fixed bottom-0 left-0 right-0 h-[64px] bg-white/80 backdrop-blur-xl border-t border-[#e5e5e5]/80 flex items-center justify-around z-40 md:hidden select-none px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
       {navItems.map((item) => {
         const isActive = pathname === item.href || (item.href === '/learn' && pathname === '/');
         const Icon = item.icon;
@@ -24,8 +24,8 @@ export const MobileBottomNav: React.FC = () => {
           <Link
             key={item.name}
             href={item.href}
-            className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all ${
-              isActive ? 'text-[#1cb0f6]' : 'text-[#afafaf] hover:text-[#777]'
+            className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all duration-150 active:scale-90 ${
+              isActive ? 'text-[#1cb0f6] bg-[#ddf4ff]/50' : 'text-[#afafaf] hover:text-[#777]'
             }`}
           >
             <Icon className={`w-6 h-6 stroke-[2.5] ${isActive ? item.activeColor : ''}`} />

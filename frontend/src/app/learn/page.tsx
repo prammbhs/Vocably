@@ -6,18 +6,29 @@ import { TopBar } from '@/components/layout/TopBar';
 import { RightSidebar } from '@/components/layout/RightSidebar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { LearningPath } from '@/components/learn/LearningPath';
-import { getCoursePath, getCurrentUser, Unit, User } from '@/lib/api/client';
+import { getCoursePath, getCurrentUser, getQuests, Unit, User } from '@/lib/api/client';
 
 export default function LearnPage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [user, setUser] = useState<User | null>(null);
+  const [quests, setQuests] = useState<any[]>([]);
 
-  useEffect(() => {
-    async function loadData() {
-      const [pathData, userData] = await Promise.all([getCoursePath(), getCurrentUser()]);
+  const loadData = async () => {
+    try {
+      const [pathData, userData, questsData] = await Promise.all([
+        getCoursePath(),
+        getCurrentUser(),
+        getQuests(),
+      ]);
       setUnits(pathData.units);
       setUser(userData);
+      setQuests(questsData.quests);
+    } catch (err) {
+      console.error('Failed to load learn page data:', err);
     }
+  };
+
+  useEffect(() => {
     loadData();
   }, []);
 
@@ -31,7 +42,7 @@ export default function LearnPage() {
         <TopBar user={user} />
 
         <div className="flex w-full max-w-[1056px] justify-between">
-          <LearningPath units={units} />
+          <LearningPath units={units} quests={quests} onRefreshData={loadData} />
           <RightSidebar />
         </div>
       </div>

@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base, SessionLocal
 import app.models as models
-from app.routers import users, course, lessons, progress, leaderboard
+from app.routers import users, course, lessons, progress, leaderboard, quests
 
 # Ensure tables exist
 Base.metadata.create_all(bind=engine)
@@ -12,7 +12,8 @@ Base.metadata.create_all(bind=engine)
 def auto_seed_if_empty():
     db = SessionLocal()
     try:
-        if not db.query(models.Course).first():
+        # Check if course or units missing/empty, seed if needed
+        if not db.query(models.Course).first() or db.query(models.Unit).count() < 4:
             from app.seed.seed_data import seed_database
             seed_database(db)
     except Exception as e:
@@ -48,6 +49,7 @@ app.include_router(course.router)
 app.include_router(lessons.router)
 app.include_router(progress.router)
 app.include_router(leaderboard.router)
+app.include_router(quests.router)
 
 @app.get("/")
 def read_root():
