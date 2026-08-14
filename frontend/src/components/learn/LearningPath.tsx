@@ -50,11 +50,11 @@ export const LearningPath: React.FC<LearningPathProps> = ({ units, quests = [], 
     }
   };
 
-  const handleClaimChestQuest = async () => {
-    if (!chestQuest || claiming) return;
+  const handleClaimChestQuest = async (questToClaim: Quest) => {
+    if (!questToClaim || claiming) return;
     try {
       setClaiming(true);
-      const res = await claimQuest(chestQuest.id);
+      const res = await claimQuest(questToClaim.id);
       setToastMessage(res.message);
       if (onRefreshData) {
         onRefreshData();
@@ -205,7 +205,7 @@ export const LearningPath: React.FC<LearningPathProps> = ({ units, quests = [], 
               </div>
             ) : activeModalQuest.current >= activeModalQuest.total ? (
               <button
-                onClick={handleClaimChestQuest}
+                onClick={() => handleClaimChestQuest(activeModalQuest)}
                 disabled={claiming}
                 className="w-full py-3.5 bg-[#58cc02] text-white font-extrabold text-base uppercase rounded-2xl border-b-4 border-[#46a302] hover:brightness-105 active:border-b-0 active:translate-y-1 transition-all shadow-md flex items-center justify-center gap-2"
               >
